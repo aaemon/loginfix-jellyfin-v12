@@ -19,15 +19,16 @@ ghcr.io/aaemon/cusom-jellyfin-v12:latest
 
 The workflow checks `ghcr.io/jellyfin/jellyfin:latest` every six hours. It builds
 and publishes only when the upstream Jellyfin version has not already been
-published. A build fails safely if Jellyfin changes its web bundle enough that a
-patch is no longer valid.
+published. The upstream version is used unchanged, matching the official
+Jellyfin Docker tag format (`12.0`, not `12.0.0`). A build fails safely if
+Jellyfin changes its web bundle enough that a patch is no longer valid.
 
 ## Docker Compose
 
 ```yaml
 services:
   jellyfin:
-    image: ghcr.io/aaemon/cusom-jellyfin-v12:12.0.0
+    image: ghcr.io/aaemon/cusom-jellyfin-v12:12.0
 ```
 
 Pin a version in production. Do not use `latest` for an unattended database
