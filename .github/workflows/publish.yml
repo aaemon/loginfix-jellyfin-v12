@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: docker/setup-buildx-action@v4
+
       - name: Read latest upstream version
         id: upstream
         shell: bash
@@ -29,9 +31,10 @@ jobs:
           set -Eeuo pipefail
           docker pull ghcr.io/jellyfin/jellyfin:latest
           version=$(docker image inspect ghcr.io/jellyfin/jellyfin:latest --format '{{index .Config.Labels "org.opencontainers.image.version"}}')
-          digest=$(docker image inspect ghcr.io/jellyfin/jellyfin:latest --format '{{index .RepoDigests 0}}')
+          digest=$(docker buildx imagetools inspect --format '{{.Manifest.Digest}}' ghcr.io/jellyfin/jellyfin:latest)
           test -n "$version"
           test -n "$digest"
+          digest="ghcr.io/jellyfin/jellyfin@$digest"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
@@ -41,24 +44,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check whether this version was already published
+      - name: Check whether both architectures are published
         id: existing
         shell: bash
         run: |
-          if docker manifest inspect "ghcr.io/${{ github.repository }}:${{ steps.upstream.outputs.version }}" >/dev/null 2>&1; then
+          set -Eeuo pipefail
+          image="ghcr.io/${{ github.repository }}:${{ steps.upstream.outputs.version }}"
+          manifest=$(docker buildx imagetools inspect --raw "$image" 2>/dev/null || true)
+          if [[ -n "$manifest" ]] && jq -e '
+            [ .manifests[]? | .platform? // empty
+              | select(.os == "linux" and (.architecture == "amd64" or .architecture == "arm64"))
+              | .architecture
+            ] | index("amd64") != null and index("arm64") != null
+          ' <<<"$manifest" >/dev/null; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
           else
             echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: docker/setup-buildx-action@v4
+      - uses: docker/setup-qemu-action@v4
         if: steps.existing.outputs.publish == 'true'
+        with:
+          platforms: arm64
 
       - uses: docker/build-push-action@v7
         if: steps.existing.outputs.publish == 'true'
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64
           build-args: |
             JELLYFIN_IMAGE=${{ steps.upstream.outputs.digest }}
             JELLYFIN_BASE_DIGEST=${{ steps.upstream.outputs.digest }}

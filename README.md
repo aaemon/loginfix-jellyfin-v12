@@ -17,11 +17,14 @@ ghcr.io/aaemon/cusom-jellyfin-v12:<jellyfin-version>
 ghcr.io/aaemon/cusom-jellyfin-v12:latest
 ```
 
+Published manifests support `linux/amd64` and `linux/arm64`.
+
 The workflow checks `ghcr.io/jellyfin/jellyfin:latest` every six hours. It builds
 and publishes only when the upstream Jellyfin version has not already been
-published. The upstream version is used unchanged, matching the official
-Jellyfin Docker tag format (`12.0`, not `12.0.0`). A build fails safely if
-Jellyfin changes its web bundle enough that a patch is no longer valid.
+published for both architectures. The upstream version is used unchanged,
+matching the official Jellyfin Docker tag format (`12.0`, not `12.0.0`). A build
+fails safely if Jellyfin changes its web bundle enough that a patch is no longer
+valid.
 
 ## Docker Compose
 
