@@ -1,4 +1,4 @@
-name: Publish Custom Jellyfin
+name: Publish Login-Fix Jellyfin
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
   packages: write
 
 concurrency:
-  group: publish-custom-jellyfin
+  group: publish-loginfix-jellyfin
   cancel-in-progress: false
 
 jobs:
@@ -49,6 +49,10 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
+          if [[ "$GITHUB_EVENT_NAME" != "schedule" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           image="ghcr.io/${{ github.repository }}:${{ steps.upstream.outputs.version }}"
           manifest=$(docker buildx imagetools inspect --raw "$image" 2>/dev/null || true)
           if [[ -n "$manifest" ]] && jq -e '

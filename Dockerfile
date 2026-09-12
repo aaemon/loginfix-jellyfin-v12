@@ -2,7 +2,7 @@ ARG JELLYFIN_IMAGE=ghcr.io/jellyfin/jellyfin:latest
 FROM ${JELLYFIN_IMAGE}
 
 ARG JELLYFIN_BASE_DIGEST=unknown
-LABEL org.opencontainers.image.source="https://github.com/aaemon/cusom-jellyfin-v12"
+LABEL org.opencontainers.image.source="https://github.com/aaemon/loginfix-jellyfin-v12"
 LABEL io.raspicloud.jellyfin-autologin.base-digest="${JELLYFIN_BASE_DIGEST}"
 
 USER root
@@ -26,11 +26,7 @@ RUN set -eu; \
     sed -i "s/$old_hash/autologin00000000000/g" /jellyfin/jellyfin-web/runtime.bundle.js; \
     grep -q 'autologin00000000000' /jellyfin/jellyfin-web/runtime.bundle.js; \
     sed -i -E 's/runtime\.bundle\.js\?[^" ]+/runtime.bundle.js?autologin1/g' /jellyfin/jellyfin-web/index.html; \
-    grep -q 'runtime.bundle.js?autologin1' /jellyfin/jellyfin-web/index.html; \
-    sed -i 's/this.get("enableBackdrops",!1),!1/this.get("enableBackdrops",!1),!0/' /jellyfin/jellyfin-web/main.jellyfin.bundle.js; \
-    grep -q 'this.get("enableBackdrops",!1),!0' /jellyfin/jellyfin-web/main.jellyfin.bundle.js; \
-    sed -i -E 's/main\.jellyfin\.bundle\.js\?[^" ]+/main.jellyfin.bundle.js?autologin-backdrops1/g' /jellyfin/jellyfin-web/index.html; \
-    grep -q 'main.jellyfin.bundle.js?autologin-backdrops1' /jellyfin/jellyfin-web/index.html
+    grep -q 'runtime.bundle.js?autologin1' /jellyfin/jellyfin-web/index.html
 
 COPY jellyfin-wrapper.sh /usr/local/bin/jellyfin-autologin-wrapper
 

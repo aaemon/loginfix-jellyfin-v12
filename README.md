@@ -1,20 +1,22 @@
-# Custom Jellyfin v12
+# Login-Fix Jellyfin v12
 
 Custom Jellyfin image based on the official Jellyfin image.
 
 Included changes:
 
 - Restores one-click Web login for visible passwordless users.
-- Enables library backdrops by default while preserving users' explicit choices.
 - Synchronizes `EnableAutoLogin` from the actual Jellyfin password state at server startup.
+
+This image contains no navbar, backdrop, or other interface customization. Those
+changes belong to the separate `custom-jellyfin-v12` image.
 
 ## Image
 
 GitHub Actions publishes the image to:
 
 ```text
-ghcr.io/aaemon/cusom-jellyfin-v12:<jellyfin-version>
-ghcr.io/aaemon/cusom-jellyfin-v12:latest
+ghcr.io/aaemon/loginfix-jellyfin-v12:<jellyfin-version>
+ghcr.io/aaemon/loginfix-jellyfin-v12:latest
 ```
 
 Published manifests support `linux/amd64` and `linux/arm64`.
@@ -31,7 +33,7 @@ valid.
 ```yaml
 services:
   jellyfin:
-    image: ghcr.io/aaemon/cusom-jellyfin-v12:12.0
+    image: ghcr.io/aaemon/loginfix-jellyfin-v12:12.0
 ```
 
 Pin a version in production. Do not use `latest` for an unattended database
@@ -40,5 +42,5 @@ upgrade.
 ## Local build
 
 ```bash
-docker build -t custom-jellyfin:local .
+docker build -t loginfix-jellyfin:local .
 ```
